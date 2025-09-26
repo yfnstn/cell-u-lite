@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>cell-u-lite v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg: #000000;
+      --surface: #111111;
+      --text: #c0c0c0;
+      --muted: #808080;
+      --border: #5a5959;
+      --accent: #0091ff;
+      --accent-weak: #003333;
+      --accent-strong: #00ffff;
+      --warning: #ff0000;
+      --error: #ff0000;
+      --green: #04ff00;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      font-family: "Lucida Console", Lucida, monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--text);
+      background: var(--bg);
+      text-shadow: 0 0 2px var(--text);
+    }
+    .app{
+      max-width: none;
+      margin: 0;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+    header.app-title{
+      display: block;
+      margin: 0 0 2rem 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    header.app-title h1{
+      font-size: 19px;
+      margin: 0;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    header.app-title .hint{
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Two-column layout */
+    .layout{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 820px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    /* Terminal Pane */
+    .pane{
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 0;
+    }
+    .pane .pane-head{
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .pane .pane-head .title{
+      font-weight: bold;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .pane .pane-body{
+      padding: 1rem;
+      background: var(--bg);
+    }
+
+    label[for="source"]{
+      display: block;
+      font-size: 13px;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    textarea#source{
+      width: 100%;
+      min-height: 300px;
+      resize: vertical;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      background: var(--bg);
+      color: var(--text);
+      text-shadow: 0 0 2px var(--text);
+    }
+    textarea#source:focus{
+      outline: 2px solid var(--accent);
+      outline-offset: 0;
+    }
+    .small-hint{
+      margin-top: 0.5rem;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .grid-toolbar{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .count-badge, .sel-badge{
+      font-size: 12px;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      color: var(--green);
+      text-transform: uppercase;
+    }
+    .grid-wrap{
+      display: flex;
+      flex-direction: column;
+      min-height: 300px;
+      gap: 0.5rem;
+    }
+
+    /* Terminal Controls */
+    .btn{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: "Courier New", Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 2px var(--text);
+    }
+    .btn.primary{
+      background: var(--surface);
+      border-color: var(--accent);
+      color: var(--accent);
+      text-shadow: 0 0 2px var(--accent);
+    }
+    .btn:hover{
+      background: var(--accent-weak);
+      color: var(--accent);
+    }
+    .btn:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .seg{
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .seg select{
+      appearance: none;
+      border: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+      text-shadow: 0 0 2px var(--text);
+    }
+
+    /* Terminal Grid */
+    #grid{
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(22px, auto);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      overflow: auto;
+      counter-reset: row;
+    }
+
+    .cell{
+      position: relative;
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.25rem 0.5rem 0.25rem 3rem;
+      border-bottom: 1px solid var(--border);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--text);
+      background: transparent;
+      cursor: pointer;
+      white-space: pre-wrap;
+      word-break: break-word;
+      outline: none;
+      text-shadow: 0 0 2px var(--text);
+    }
+    .cell:last-child{ border-bottom: none; }
+    .cell:hover{
+      background: var(--accent-weak);
+      color: var(--accent);
+    }
+    .cell:focus{
+      outline: 1px solid var(--accent);
+      outline-offset: -1px;
+      background: var(--accent-weak);
+      color: var(--accent);
+    }
+    .cell.selected{
+      background: var(--surface);
+      color: var(--warning);
+      border-left: 3px solid var(--error);
+      text-shadow: 0 0 2px var(--warning);
+    }
+
+    /* Terminal Row Numbers */
+    .cell::before{
+      counter-increment: row;
+      content: counter(row, decimal-leading-zero);
+      position: absolute;
+      left: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      min-width: 2rem;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
+      padding-right: 0.5rem;
+      border-right: 1px solid var(--border);
+    }
+
+    /* Terminal Toast */
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 2px var(--accent);
+    }
+    #toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Terminal cursor effect */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .terminal-cursor::after {
+      content: '█';
+      color: var(--accent);
+      animation: blink 1s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-title">
+      <h1>Cell-u-lite v5</h1>
+      <div class="hint">PASTE TEXT ON LEFT — SELECT CELLS ON RIGHT — COPY SELECTED — PASTE INTO SPREADSHEET</div>
+    </header>
+
+    <main class="layout" aria-label="Terminal cell formatter">
+      <!-- Left: input -->
+      <section class="pane" aria-labelledby="srcTitle">
+        <div class="pane-head"><div id="srcTitle" class="title">INPUT</div></div>
+        <div class="pane-body">
+          <label for="source">TYPE OR PASTE TEXT (EACH LINE = ONE CELL):</label>
+          <textarea id="source" placeholder="EXAMPLE:
+APPLES
+
+BANANAS
+
+CHERRIES
+..."></textarea>
+          <div class="small-hint">UPDATES LIVE. BLANK LINES IGNORED. CLICK CELLS TO SELECT.</div>
+        </div>
+      </section>
+
+      <!-- Right: grid -->
+      <section class="pane" aria-labelledby="gridTitle">
+        <div class="pane-head">
+          <div id="gridTitle" class="title">OUTPUT CELLS</div>
+        </div>
+        <div class="pane-body">
+          <div class="grid-toolbar">
+            <button id="copyBtn" class="btn primary" disabled>COPY SELECTED</button>
+            <span class="seg" title="Newline format">
+              <label for="newlineMode" class="visually-hidden" aria-hidden="true" style="position:absolute;left:-9999px;">Newlines</label>
+              <select id="newlineMode">
+                <option value="lf" selected>LF (\n)</option>
+                <option value="crlf">CRLF (\r\n)</option>
+              </select>
+            </span>
+            <button id="selectAllBtn" class="btn">SELECT ALL</button>
+            <button id="clearBtn" class="btn" disabled>CLEAR</button>
+            <span class="count-badge" id="countBadge" aria-live="polite">0 CELLS</span>
+            <span class="sel-badge" id="selectedBadge" aria-live="polite">0 SELECTED</span>
+          </div>
+
+          <div class="grid-wrap">
+            <div
+              id="grid"
+              role="listbox"
+              aria-multiselectable="true"
+              aria-label="Terminal cell list"
+              aria-describedby="gridHelp"
+            ></div>
+            <div id="gridHelp" class="small-hint">
+              CLICK=SELECT ONE | SHIFT+CLICK=RANGE | CTRL/CMD+CLICK=TOGGLE | ARROWS=NAVIGATE | SPACE=TOGGLE | CTRL/CMD+A=ALL | ESC=CLEAR
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (function(){
+      const source        = document.getElementById('source');
+      const grid          = document.getElementById('grid');
+      const toast         = document.getElementById('toast');
+      const countBadge    = document.getElementById('countBadge');
+      const selectedBadge = document.getElementById('selectedBadge');
+      const copyBtn       = document.getElementById('copyBtn');
+      const newlineMode   = document.getElementById('newlineMode');
+      const selectAllBtn  = document.getElementById('selectAllBtn');
+      const clearBtn      = document.getElementById('clearBtn');
+
+      const debounce = (fn, delay=120) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
+
+      let lines = [];
+      let selected = new Set();      // indices of selected rows
+      let focusIndex = 0;            // which row has roving tabindex=0
+      let anchorIndex = null;        // anchor for shift-range
+
+      function updateCounts(){
+        countBadge.textContent = `${lines.length} ${lines.length === 1 ? 'CELL' : 'CELLS'}`;
+        selectedBadge.textContent = `${selected.size} SELECTED`;
+        copyBtn.disabled  = selected.size === 0;
+        clearBtn.disabled = selected.size === 0;
+        selectAllBtn.disabled = lines.length === 0 || selected.size === lines.length;
+      }
+
+      function createCell(idx, text){
+        const el = document.createElement('div');
+        el.className = 'cell';
+        el.setAttribute('role','option');
+        el.setAttribute('aria-selected', selected.has(idx) ? 'true' : 'false');
+        el.tabIndex = (idx === focusIndex ? 0 : -1);
+        el.dataset.idx = String(idx);
+        el.dataset.text = text;
+        el.textContent = text; // keep plaintext, preserve in CSS with white-space: pre-wrap
+        if (selected.has(idx)) el.classList.add('selected');
+        return el;
+      }
+
+      function buildGridFromSource(){
+        const normalized = (source.value || '').replace(/\r\n/g, '\n');
+        // Filter out blank lines
+        lines = normalized.length ? normalized.split('\n').filter(line => line.trim() !== '') : [];
+        // prune selection beyond new length
+        selected.forEach(i => { if (i >= lines.length) selected.delete(i); });
+        if (focusIndex >= lines.length) focusIndex = Math.max(0, lines.length - 1);
+
+        const frag = document.createDocumentFragment();
+        for (let i=0;i<lines.length;i++){
+          frag.appendChild(createCell(i, lines[i]));
+        }
+        grid.replaceChildren(frag);
+        if (lines.length){
+          // Ensure a focusable target exists
+          setFocus(focusIndex);
+        }
+        updateCounts();
+      }
+
+      function setFocus(idx){
+        const prev = grid.querySelector('.cell[tabindex="0"]');
+        if (prev) prev.tabIndex = -1;
+        const next = grid.children[idx];
+        if (next){
+          next.tabIndex = 0;
+          next.focus();
+          focusIndex = idx;
+        }
+      }
+
+      function refreshSelectionDOM(){
+        const cells = grid.children;
+        for (let i=0;i<cells.length;i++){
+          const el = cells[i];
+          const sel = selected.has(i);
+          if (sel) el.classList.add('selected'); else el.classList.remove('selected');
+          el.setAttribute('aria-selected', sel ? 'true' : 'false');
+        }
+        updateCounts();
+      }
+
+      function selectRange(a, b, {replace=false} = {}){
+        const [start, end] = a <= b ? [a, b] : [b, a];
+        if (replace) selected.clear();
+        for (let i=start; i<=end; i++){ selected.add(i); }
+        refreshSelectionDOM();
+      }
+
+      function toggleIndex(idx){
+        if (selected.has(idx)) selected.delete(idx); else selected.add(idx);
+        const el = grid.children[idx];
+        if (el){
+          el.classList.toggle('selected', selected.has(idx));
+          el.setAttribute('aria-selected', selected.has(idx) ? 'true' : 'false');
+        }
+        updateCounts();
+      }
+
+      // Click selection logic (no automatic copy)
+      grid.addEventListener('click', (e) => {
+        const cell = e.target.closest('.cell');
+        if (!cell) return;
+        const idx = Number(cell.dataset.idx);
+        if (e.shiftKey && anchorIndex != null){
+          selectRange(anchorIndex, idx, {replace: !(e.ctrlKey || e.metaKey)});
+        } else if (e.ctrlKey || e.metaKey){
+          toggleIndex(idx);
+          anchorIndex = idx;
+        } else {
+          // plain click: single selection
+          selected.clear();
+          selected.add(idx);
+          refreshSelectionDOM();
+          anchorIndex = idx;
+        }
+        setFocus(idx);
+      });
+
+      // Keyboard navigation + selection
+      grid.addEventListener('keydown', (e) => {
+        const key = e.key;
+        const mod = e.ctrlKey || e.metaKey;
+
+        if (key === 'ArrowDown' || key === 'ArrowUp'){
+          e.preventDefault();
+          if (!lines.length) return;
+          let next = focusIndex + (key === 'ArrowDown' ? 1 : -1);
+          next = Math.max(0, Math.min(lines.length - 1, next));
+          if (e.shiftKey){
+            if (anchorIndex == null) anchorIndex = focusIndex;
+            selectRange(anchorIndex, next, {replace:true});
+          } else {
+            selected.clear(); selected.add(next);
+            refreshSelectionDOM();
+            anchorIndex = next;
+          }
+          setFocus(next);
+        } else if (key === ' ' || key === 'Enter'){
+          e.preventDefault();
+          toggleIndex(focusIndex);
+          if (anchorIndex == null) anchorIndex = focusIndex;
+        } else if (mod && key.toLowerCase() === 'a'){
+          e.preventDefault();
+          selected = new Set([...Array(lines.length).keys()]);
+          refreshSelectionDOM();
+          anchorIndex = 0;
+          if (lines.length) setFocus(0);
+        } else if (mod && key.toLowerCase() === 'c'){
+          e.preventDefault();
+          copySelectedToClipboard();
+        } else if (key === 'Escape'){
+          e.preventDefault();
+          selected.clear();
+          refreshSelectionDOM();
+          anchorIndex = null;
+        }
+      });
+
+      // Buttons
+      copyBtn.addEventListener('click', () => copySelectedToClipboard());
+      selectAllBtn.addEventListener('click', () => {
+        selected = new Set([...Array(lines.length).keys()]);
+        refreshSelectionDOM();
+        anchorIndex = 0;
+        if (lines.length) setFocus(0);
+      });
+      clearBtn.addEventListener('click', () => {
+        selected.clear();
+        refreshSelectionDOM();
+        anchorIndex = null;
+      });
+
+      function selectedText(newlineKind){
+        const ordered = Array.from(selected).sort((a,b)=>a-b);
+        const nl = newlineKind === 'crlf' ? '\r\n' : '\n';
+        return ordered.map(i => lines[i] ?? '').join(nl);
+      }
+
+      async function copySelectedToClipboard(){
+        if (selected.size === 0) return;
+        const kind = newlineMode.value; // 'lf' or 'crlf'
+        const text = selectedText(kind);
+        try{
+          await copyPlainText(text);
+          showToast(`COPIED ${selected.size} ${selected.size===1?'LINE':'LINES'}`);
+        }catch(err){
+          console.error('Copy failed:', err);
+          showToast('COPY FAILED');
+        }
+      }
+
+      async function copyPlainText(text){
+        // Clipboard as text/plain only (no formatting)
+        if (navigator.clipboard && window.isSecureContext){
+          return navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly','');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          ta.style.fontSize = '12pt';
+          document.body.appendChild(ta);
+          const selection = document.getSelection();
+          const originalRange = selection.rangeCount ? selection.getRangeAt(0) : null;
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          if (originalRange){
+            selection.removeAllRanges();
+            selection.addRange(originalRange);
+          }
+          return;
+        }
+      }
+
+      function showToast(message){
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 1300);
+      }
+
+      const liveRender = debounce(buildGridFromSource, 90);
+      source.addEventListener('input', liveRender);
+
+      // Initial render (in case browser restores textarea contents)
+      buildGridFromSource();
+    })();
+  </script>
+</body>
+</html>
