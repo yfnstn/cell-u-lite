@@ -2,23 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Q&A Formatter - Cell-u-lite v5</title>
+  <title>QandA-form-u-lite v6</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --bg: #000000;
-      --surface: #111111;
-      --text: #c0c0c0;
-      --muted: #808080;
-      --border: #5a5959;
-      --accent: #0091ff;
-      --accent-weak: #003333;
-      --accent-strong: #00ffff;
-      --warning: #ff0000;
-      --error: #ff0000;
-      --green: #04ff00;
-      --question-color: #00ffff;
-      --answer-color: #04ff00;
+      /* Solarized Light */
+      --bg: #fdf6e3;
+      --surface: #eee8d5;
+      --text: #586e75;
+      --muted: #93a1a1;
+      --border: #b58900;
+      --accent: #268bd2;
+      --accent-weak: #eee8d5;
+      --accent-strong: #2aa198;
+      --warning: #dc322f;
+      --error: #dc322f;
+      --green: #859900;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -32,7 +31,6 @@
       line-height: 1.2;
       color: var(--text);
       background: var(--bg);
-      text-shadow: 0 0 2px var(--text);
     }
     .app{
       max-width: none;
@@ -135,7 +133,6 @@
       line-height: 1.2;
       background: var(--bg);
       color: var(--text);
-      text-shadow: 0 0 2px var(--text);
     }
     textarea#source:focus{
       outline: 2px solid var(--accent);
@@ -150,7 +147,7 @@
     /* Formatting Options */
     .format-options{
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       margin-bottom: 1rem;
       padding: 1rem;
@@ -175,7 +172,6 @@
       padding: 0.5rem;
       font-size: 13px;
       font-family: "Courier New", Courier, monospace;
-      text-shadow: 0 0 2px var(--text);
     }
 
     /* Terminal Controls */
@@ -191,13 +187,11 @@
       font-family: "Courier New", Courier, monospace;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 0 0 2px var(--text);
     }
     .btn.primary{
       background: var(--surface);
       border-color: var(--accent);
       color: var(--accent);
-      text-shadow: 0 0 2px var(--accent);
     }
     .btn:hover{
       background: var(--accent-weak);
@@ -250,23 +244,11 @@
       white-space: pre-wrap;
       word-break: break-word;
       overflow-y: auto;
-      text-shadow: 0 0 2px var(--text);
     }
 
     /* Q&A Styling */
     .qa-pair{
       margin-bottom: 1.5rem;
-    }
-    .question{
-      color: var(--question-color);
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 0 2px var(--question-color);
-    }
-    .answer{
-      color: var(--answer-color);
-      margin-left: 1rem;
-      text-shadow: 0 0 2px var(--answer-color);
     }
 
     /* Terminal Toast */
@@ -287,7 +269,6 @@
       font-family: "Courier New", Courier, monospace;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 0 0 2px var(--accent);
     }
     #toast.show{
       opacity: 1;
@@ -298,11 +279,11 @@
 <body>
   <div class="app">
     <header class="app-title">
-      <h1>Q&A Formatter</h1>
+      <h1>QandA-form-u-lite v6</h1>
       <div class="hint">PASTE Q&A TEXT ON LEFT — FORMATTED OUTPUT ON RIGHT — COPY FOR DOCUMENTS</div>
       <div class="nav-links">
-        <a href="cell-u-lite.html">Cell Formatter</a>
-        <a href="qa-formatter.html" class="active">Q&A Formatter</a>
+        <a href="cell-u-lite.html">Cell-u-lite</a>
+        <a href="qa-formatter.html" class="active">QandA-form-u-lite</a>
       </div>
     </header>
 
@@ -312,15 +293,15 @@
         <div class="pane-head"><div id="srcTitle" class="title">INPUT</div></div>
         <div class="pane-body">
           <label for="source">TYPE OR PASTE Q&A TEXT:</label>
-          <textarea id="source" placeholder="Q: What is the capital of France?
-A: The capital of France is Paris.
+          <textarea id="source" placeholder="What is the capital of France?	The capital of France is Paris.
+How many days are in a week?	There are 7 days in a week.
+What is 2+2?	2+2 equals 4.
 
-Q: How many days are in a week?
-A: There are 7 days in a week.
-
-Q: What is 2+2?
-A: 2+2 equals 4."></textarea>
-          <div class="small-hint">AUTOMATICALLY DETECTS Q: AND A: PATTERNS. UPDATES LIVE.</div>
+OR PASTE FROM SPREADSHEET:
+Question	Answer
+What is photosynthesis?	The process by which plants convert sunlight into energy
+Who wrote Romeo and Juliet?	William Shakespeare"></textarea>
+          <div class="small-hint">PASTE FROM SPREADSHEET (TAB-SEPARATED) OR Q: A: FORMAT. CUSTOMIZE FORMATTING BELOW.</div>
         </div>
       </section>
 
@@ -334,17 +315,17 @@ A: 2+2 equals 4."></textarea>
             <div class="format-group">
               <label for="questionStyle">Question Style</label>
               <select id="questionStyle">
+                <option value="normal" selected>Normal</option>
                 <option value="bold">Bold</option>
                 <option value="italic">Italic</option>
                 <option value="underline">Underline</option>
-                <option value="normal">Normal</option>
               </select>
             </div>
             <div class="format-group">
               <label for="answerStyle">Answer Style</label>
               <select id="answerStyle">
+                <option value="italic" selected>Italic</option>
                 <option value="normal">Normal</option>
-                <option value="italic">Italic</option>
                 <option value="bold">Bold</option>
                 <option value="underline">Underline</option>
               </select>
@@ -352,9 +333,10 @@ A: 2+2 equals 4."></textarea>
             <div class="format-group">
               <label for="questionColor">Question Color</label>
               <select id="questionColor">
-                <option value="cyan">Cyan</option>
+                <option value="black" selected>Black</option>
                 <option value="blue">Blue</option>
                 <option value="green">Green</option>
+                <option value="cyan">Cyan</option>
                 <option value="yellow">Yellow</option>
                 <option value="red">Red</option>
                 <option value="white">White</option>
@@ -363,12 +345,37 @@ A: 2+2 equals 4."></textarea>
             <div class="format-group">
               <label for="answerColor">Answer Color</label>
               <select id="answerColor">
+                <option value="blue" selected>Blue</option>
+                <option value="black">Black</option>
                 <option value="green">Green</option>
                 <option value="cyan">Cyan</option>
-                <option value="blue">Blue</option>
                 <option value="yellow">Yellow</option>
                 <option value="red">Red</option>
                 <option value="white">White</option>
+              </select>
+            </div>
+            <div class="format-group">
+              <label for="fontFamily">Font</label>
+              <select id="fontFamily">
+                <option value="Arial, sans-serif" selected>Arial</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                <option value="'Lucida Console', Lucida, monospace">Lucida Console</option>
+              </select>
+            </div>
+            <div class="format-group">
+              <label for="fontSize">Font Size</label>
+              <select id="fontSize">
+                <option value="12px">12px</option>
+                <option value="14px" selected>14px</option>
+                <option value="16px">16px</option>
+                <option value="18px">18px</option>
+                <option value="20px">20px</option>
+                <option value="24px">24px</option>
               </select>
             </div>
           </div>
@@ -399,6 +406,7 @@ A: 2+2 equals 4."></textarea>
 
   <script>
     (function(){
+      // DOM elements
       const source = document.getElementById('source');
       const output = document.getElementById('output');
       const toast = document.getElementById('toast');
@@ -409,21 +417,32 @@ A: 2+2 equals 4."></textarea>
       const answerStyle = document.getElementById('answerStyle');
       const questionColor = document.getElementById('questionColor');
       const answerColor = document.getElementById('answerColor');
-
-      const debounce = (fn, delay=120) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
-
-      let qaPairs = [];
+      const fontFamily = document.getElementById('fontFamily');
+      const fontSize = document.getElementById('fontSize');
 
       // Color mapping
       const colorMap = {
+        black: '#000000',
         cyan: '#00ffff',
-        blue: '#0091ff',
-        green: '#04ff00',
-        yellow: '#ffff00',
-        red: '#ff0000',
+        blue: '#268bd2',
+        green: '#859900',
+        yellow: '#b58900',
+        red: '#dc322f',
         white: '#ffffff'
       };
 
+      let qaPairs = [];
+
+      // Utility functions
+      const debounce = (fn, delay=120) => { 
+        let t; 
+        return (...args) => { 
+          clearTimeout(t); 
+          t = setTimeout(() => fn(...args), delay); 
+        }; 
+      };
+
+      // Parse Q&A pairs from input text
       function parseQAPairs(text) {
         const lines = text.split('\n');
         const pairs = [];
@@ -432,11 +451,30 @@ A: 2+2 equals 4."></textarea>
 
         for (let line of lines) {
           const trimmed = line.trim();
+          if (!trimmed) continue;
           
-          // Check for question pattern
+          // Tab-separated format (spreadsheet style)
+          if (trimmed.includes('\t')) {
+            const parts = trimmed.split('\t');
+            if (parts.length >= 2) {
+              const question = parts[0].trim();
+              const answer = parts.slice(1).join('\t').trim();
+              
+              // Skip header rows
+              if (question.toLowerCase() === 'question' && answer.toLowerCase() === 'answer') {
+                continue;
+              }
+              
+              if (question && answer) {
+                pairs.push({ question, answer });
+              }
+            }
+            continue;
+          }
+          
+          // Q: A: format
           const qMatch = trimmed.match(/^Q:\s*(.+)/i);
           if (qMatch) {
-            // Save previous pair if exists
             if (currentQ && currentA !== null) {
               pairs.push({ question: currentQ, answer: currentA });
             }
@@ -445,20 +483,17 @@ A: 2+2 equals 4."></textarea>
             continue;
           }
 
-          // Check for answer pattern
           const aMatch = trimmed.match(/^A:\s*(.+)/i);
           if (aMatch) {
             currentA = aMatch[1];
             continue;
           }
 
-          // If we have a current answer and this line isn't empty, append to answer
           if (currentA !== null && trimmed) {
             currentA += ' ' + trimmed;
           }
         }
 
-        // Don't forget the last pair
         if (currentQ && currentA !== null) {
           pairs.push({ question: currentQ, answer: currentA });
         }
@@ -466,45 +501,42 @@ A: 2+2 equals 4."></textarea>
         return pairs;
       }
 
-      function formatQAPair(pair, index) {
-        const qColor = colorMap[questionColor.value] || colorMap.cyan;
-        const aColor = colorMap[answerColor.value] || colorMap.green;
-        
+      // Create formatted HTML for a single Q&A pair
+      function createFormattedHTML(pair) {
+        const qColor = colorMap[questionColor.value] || colorMap.black;
+        const aColor = colorMap[answerColor.value] || colorMap.blue;
         const qStyle = questionStyle.value;
         const aStyle = answerStyle.value;
+        const font = fontFamily.value;
+        const size = fontSize.value;
 
-        let questionHTML = `<span class="question" style="color: ${qColor};">`;
-        let answerHTML = `<span class="answer" style="color: ${aColor};">`;
+        const baseStyle = `font-family: ${font}; font-size: ${size}; font-weight: normal;`;
+        
+        const questionHTML = createStyledText(pair.question, qColor, qStyle, baseStyle);
+        const answerHTML = createStyledText(pair.answer, aColor, aStyle, baseStyle);
 
-        // Apply question styling
-        if (qStyle === 'bold') questionHTML += '<strong>';
-        if (qStyle === 'italic') questionHTML += '<em>';
-        if (qStyle === 'underline') questionHTML += '<u>';
-
-        questionHTML += pair.question;
-
-        if (qStyle === 'underline') questionHTML += '</u>';
-        if (qStyle === 'italic') questionHTML += '</em>';
-        if (qStyle === 'bold') questionHTML += '</strong>';
-
-        questionHTML += '</span>';
-
-        // Apply answer styling
-        if (aStyle === 'bold') answerHTML += '<strong>';
-        if (aStyle === 'italic') answerHTML += '<em>';
-        if (aStyle === 'underline') answerHTML += '<u>';
-
-        answerHTML += pair.answer;
-
-        if (aStyle === 'underline') answerHTML += '</u>';
-        if (aStyle === 'italic') answerHTML += '</em>';
-        if (aStyle === 'bold') answerHTML += '</strong>';
-
-        answerHTML += '</span>';
-
-        return `<div class="qa-pair">${questionHTML}\n${answerHTML}</div>`;
+        return `<div class="qa-pair">${questionHTML}<br>${answerHTML}</div>`;
       }
 
+      // Create styled text with color and formatting
+      function createStyledText(text, color, style, baseStyle) {
+        let html = `<span style="color: ${color}; ${baseStyle}">`;
+        
+        if (style === 'bold') html += '<strong>';
+        if (style === 'italic') html += '<em>';
+        if (style === 'underline') html += '<u>';
+
+        html += text;
+
+        if (style === 'underline') html += '</u>';
+        if (style === 'italic') html += '</em>';
+        if (style === 'bold') html += '</strong>';
+
+        html += '</span>';
+        return html;
+      }
+
+      // Update the output display
       function updateOutput() {
         const text = source.value || '';
         qaPairs = parseQAPairs(text);
@@ -517,7 +549,7 @@ A: 2+2 equals 4."></textarea>
           return;
         }
 
-        const formattedHTML = qaPairs.map((pair, index) => formatQAPair(pair, index)).join('\n\n');
+        const formattedHTML = qaPairs.map(pair => createFormattedHTML(pair)).join('\n\n');
         output.innerHTML = formattedHTML;
         
         countBadge.textContent = `${qaPairs.length} ${qaPairs.length === 1 ? 'Q&A PAIR' : 'Q&A PAIRS'}`;
@@ -525,30 +557,19 @@ A: 2+2 equals 4."></textarea>
         copyPlainBtn.disabled = false;
       }
 
+      // Get plain text version
       function getPlainText() {
         return qaPairs.map(pair => 
           `${pair.question}\n${pair.answer}`
         ).join('\n\n');
       }
 
-      function getFormattedText() {
-        // Create a temporary div to extract formatted text
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = output.innerHTML;
-        
-        // Convert to plain text but preserve some formatting
-        let formatted = '';
-        const pairs = tempDiv.querySelectorAll('.qa-pair');
-        
-        pairs.forEach(pair => {
-          const question = pair.querySelector('.question').textContent;
-          const answer = pair.querySelector('.answer').textContent;
-          formatted += `${question}\n${answer}\n\n`;
-        });
-        
-        return formatted.trim();
+      // Get formatted HTML for clipboard
+      function getFormattedHTML() {
+        return qaPairs.map(pair => createFormattedHTML(pair)).join('<p></p>');
       }
 
+      // Copy to clipboard
       async function copyToClipboard(text) {
         try {
           if (navigator.clipboard && window.isSecureContext) {
@@ -578,6 +599,32 @@ A: 2+2 equals 4."></textarea>
         }
       }
 
+      // Copy formatted text to clipboard
+      async function copyFormattedToClipboard() {
+        if (qaPairs.length === 0) return;
+        
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            const htmlContent = getFormattedHTML();
+            const textContent = getPlainText();
+            
+            const clipboardItem = new ClipboardItem({
+              'text/html': new Blob([htmlContent], { type: 'text/html' }),
+              'text/plain': new Blob([textContent], { type: 'text/plain' })
+            });
+            
+            await navigator.clipboard.write([clipboardItem]);
+            return true;
+          } else {
+            return await copyToClipboard(getPlainText());
+          }
+        } catch (err) {
+          console.error('Formatted copy failed:', err);
+          return await copyToClipboard(getPlainText());
+        }
+      }
+
+      // Show toast notification
       function showToast(message) {
         toast.textContent = message;
         toast.classList.add('show');
@@ -587,8 +634,7 @@ A: 2+2 equals 4."></textarea>
 
       // Event listeners
       copyBtn.addEventListener('click', async () => {
-        const text = getFormattedText();
-        const success = await copyToClipboard(text);
+        const success = await copyFormattedToClipboard();
         if (success) {
           showToast(`COPIED ${qaPairs.length} Q&A PAIRS (FORMATTED)`);
         } else {
@@ -607,7 +653,7 @@ A: 2+2 equals 4."></textarea>
       });
 
       // Update output when formatting options change
-      [questionStyle, answerStyle, questionColor, answerColor].forEach(select => {
+      [questionStyle, answerStyle, questionColor, answerColor, fontFamily, fontSize].forEach(select => {
         select.addEventListener('change', updateOutput);
       });
 

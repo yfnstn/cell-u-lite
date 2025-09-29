@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>cell-u-lite v5</title>
+  <title>cell-u-lite v6</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --bg: #000000;
-      --surface: #111111;
-      --text: #c0c0c0;
-      --muted: #808080;
-      --border: #5a5959;
-      --accent: #0091ff;
-      --accent-weak: #003333;
-      --accent-strong: #00ffff;
-      --warning: #ff0000;
-      --error: #ff0000;
-      --green: #04ff00;
+      /* Solarized Dark */
+      --bg: #002b36;
+      --surface: #073642;
+      --text: #839496;
+      --muted: #586e75;
+      --border: #657b83;
+      --accent: #268bd2;
+      --accent-weak: #073642;
+      --accent-strong: #2aa198;
+      --warning: #dc322f;
+      --error: #dc322f;
+      --green: #859900;
     }
     * { box-sizing: border-box; }
     html, body {
@@ -30,7 +31,6 @@
       line-height: 1.2;
       color: var(--text);
       background: var(--bg);
-      text-shadow: 0 0 2px var(--text);
     }
     .app{
       max-width: none;
@@ -133,7 +133,6 @@
       line-height: 1.2;
       background: var(--bg);
       color: var(--text);
-      text-shadow: 0 0 2px var(--text);
     }
     textarea#source:focus{
       outline: 2px solid var(--accent);
@@ -183,13 +182,11 @@
       font-family: "Courier New", Courier, monospace;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 0 0 2px var(--text);
     }
     .btn.primary{
       background: var(--surface);
       border-color: var(--accent);
       color: var(--accent);
-      text-shadow: 0 0 2px var(--accent);
     }
     .btn:hover{
       background: var(--accent-weak);
@@ -213,7 +210,6 @@
       padding: 0.5rem 1rem;
       font-size: 13px;
       font-family: "Courier New", Courier, monospace;
-      text-shadow: 0 0 2px var(--text);
     }
 
     /* Terminal Grid */
@@ -245,7 +241,6 @@
       white-space: pre-wrap;
       word-break: break-word;
       outline: none;
-      text-shadow: 0 0 2px var(--text);
     }
     .cell:last-child{ border-bottom: none; }
     .cell:hover{
@@ -262,7 +257,6 @@
       background: var(--surface);
       color: var(--warning);
       border-left: 3px solid var(--error);
-      text-shadow: 0 0 2px var(--warning);
     }
 
     /* Terminal Row Numbers */
@@ -299,7 +293,6 @@
       font-family: "Courier New", Courier, monospace;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 0 0 2px var(--accent);
     }
     #toast.show{
       opacity: 1;
@@ -322,11 +315,11 @@
 <body>
   <div class="app">
     <header class="app-title">
-      <h1>Cell-u-lite v5</h1>
+      <h1>Cell-u-lite v6</h1>
       <div class="hint">PASTE TEXT ON LEFT — SELECT CELLS ON RIGHT — COPY SELECTED — PASTE INTO SPREADSHEET</div>
       <div class="nav-links">
-        <a href="cell-u-lite.html" class="active">Cell Formatter</a>
-        <a href="qa-formatter.html">Q&A Formatter</a>
+        <a href="cell-u-lite.html" class="active">Cell-u-lite</a>
+        <a href="qa-formatter.html">QandA-form-u-lite</a>
       </div>
     </header>
 
