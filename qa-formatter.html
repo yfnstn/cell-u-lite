@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Q&A Formatter - Cell-u-lite v5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg: #000000;
+      --surface: #111111;
+      --text: #c0c0c0;
+      --muted: #808080;
+      --border: #5a5959;
+      --accent: #0091ff;
+      --accent-weak: #003333;
+      --accent-strong: #00ffff;
+      --warning: #ff0000;
+      --error: #ff0000;
+      --green: #04ff00;
+      --question-color: #00ffff;
+      --answer-color: #04ff00;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body{
+      font-family: "Lucida Console", Lucida, monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--text);
+      background: var(--bg);
+      text-shadow: 0 0 2px var(--text);
+    }
+    .app{
+      max-width: none;
+      margin: 0;
+      padding: 1rem;
+      min-height: 100vh;
+    }
+    header.app-title{
+      display: block;
+      margin: 0 0 2rem 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+    header.app-title h1{
+      font-size: 19px;
+      margin: 0;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    header.app-title .hint{
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .nav-links{
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .nav-links a{
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .nav-links a:hover{
+      background: var(--accent-weak);
+      color: var(--accent-strong);
+    }
+    .nav-links a.active{
+      background: var(--surface);
+      color: var(--accent-strong);
+    }
+
+    /* Two-column layout */
+    .layout{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 820px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    /* Terminal Pane */
+    .pane{
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 0;
+    }
+    .pane .pane-head{
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .pane .pane-head .title{
+      font-weight: bold;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .pane .pane-body{
+      padding: 1rem;
+      background: var(--bg);
+    }
+
+    label[for="source"]{
+      display: block;
+      font-size: 13px;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    textarea#source{
+      width: 100%;
+      min-height: 300px;
+      resize: vertical;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 15px;
+      line-height: 1.2;
+      background: var(--bg);
+      color: var(--text);
+      text-shadow: 0 0 2px var(--text);
+    }
+    textarea#source:focus{
+      outline: 2px solid var(--accent);
+      outline-offset: 0;
+    }
+    .small-hint{
+      margin-top: 0.5rem;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Formatting Options */
+    .format-options{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .format-group{
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .format-group label{
+      font-size: 12px;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+    .format-group select{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.5rem;
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+      text-shadow: 0 0 2px var(--text);
+    }
+
+    /* Terminal Controls */
+    .btn{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: "Courier New", Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 2px var(--text);
+    }
+    .btn.primary{
+      background: var(--surface);
+      border-color: var(--accent);
+      color: var(--accent);
+      text-shadow: 0 0 2px var(--accent);
+    }
+    .btn:hover{
+      background: var(--accent-weak);
+      color: var(--accent);
+    }
+    .btn:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Output Display */
+    .output-wrap{
+      display: flex;
+      flex-direction: column;
+      min-height: 300px;
+      gap: 0.5rem;
+    }
+    .output-toolbar{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .count-badge{
+      font-size: 12px;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      color: var(--green);
+      text-transform: uppercase;
+    }
+
+    #output{
+      position: relative;
+      display: block;
+      width: 100%;
+      min-height: 300px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      text-shadow: 0 0 2px var(--text);
+    }
+
+    /* Q&A Styling */
+    .qa-pair{
+      margin-bottom: 1.5rem;
+    }
+    .question{
+      color: var(--question-color);
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 2px var(--question-color);
+    }
+    .answer{
+      color: var(--answer-color);
+      margin-left: 1rem;
+      text-shadow: 0 0 2px var(--answer-color);
+    }
+
+    /* Terminal Toast */
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      font-size: 13px;
+      font-family: "Courier New", Courier, monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 2px var(--accent);
+    }
+    #toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-title">
+      <h1>Q&A Formatter</h1>
+      <div class="hint">PASTE Q&A TEXT ON LEFT — FORMATTED OUTPUT ON RIGHT — COPY FOR DOCUMENTS</div>
+      <div class="nav-links">
+        <a href="cell-u-lite.html">Cell Formatter</a>
+        <a href="qa-formatter.html" class="active">Q&A Formatter</a>
+      </div>
+    </header>
+
+    <main class="layout" aria-label="Q&A formatter">
+      <!-- Left: input -->
+      <section class="pane" aria-labelledby="srcTitle">
+        <div class="pane-head"><div id="srcTitle" class="title">INPUT</div></div>
+        <div class="pane-body">
+          <label for="source">TYPE OR PASTE Q&A TEXT:</label>
+          <textarea id="source" placeholder="Q: What is the capital of France?
+A: The capital of France is Paris.
+
+Q: How many days are in a week?
+A: There are 7 days in a week.
+
+Q: What is 2+2?
+A: 2+2 equals 4."></textarea>
+          <div class="small-hint">AUTOMATICALLY DETECTS Q: AND A: PATTERNS. UPDATES LIVE.</div>
+        </div>
+      </section>
+
+      <!-- Right: output -->
+      <section class="pane" aria-labelledby="outputTitle">
+        <div class="pane-head">
+          <div id="outputTitle" class="title">FORMATTED OUTPUT</div>
+        </div>
+        <div class="pane-body">
+          <div class="format-options">
+            <div class="format-group">
+              <label for="questionStyle">Question Style</label>
+              <select id="questionStyle">
+                <option value="bold">Bold</option>
+                <option value="italic">Italic</option>
+                <option value="underline">Underline</option>
+                <option value="normal">Normal</option>
+              </select>
+            </div>
+            <div class="format-group">
+              <label for="answerStyle">Answer Style</label>
+              <select id="answerStyle">
+                <option value="normal">Normal</option>
+                <option value="italic">Italic</option>
+                <option value="bold">Bold</option>
+                <option value="underline">Underline</option>
+              </select>
+            </div>
+            <div class="format-group">
+              <label for="questionColor">Question Color</label>
+              <select id="questionColor">
+                <option value="cyan">Cyan</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+                <option value="white">White</option>
+              </select>
+            </div>
+            <div class="format-group">
+              <label for="answerColor">Answer Color</label>
+              <select id="answerColor">
+                <option value="green">Green</option>
+                <option value="cyan">Cyan</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+                <option value="white">White</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="output-toolbar">
+            <button id="copyBtn" class="btn primary" disabled>COPY FORMATTED TEXT</button>
+            <button id="copyPlainBtn" class="btn">COPY PLAIN TEXT</button>
+            <span class="count-badge" id="countBadge" aria-live="polite">0 Q&A PAIRS</span>
+          </div>
+
+          <div class="output-wrap">
+            <div
+              id="output"
+              role="textbox"
+              aria-label="Formatted Q&A output"
+              aria-readonly="true"
+            ></div>
+            <div class="small-hint">
+              FORMATTED TEXT READY FOR COPY/PASTE INTO WORD OR GOOGLE DOCS
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    (function(){
+      const source = document.getElementById('source');
+      const output = document.getElementById('output');
+      const toast = document.getElementById('toast');
+      const countBadge = document.getElementById('countBadge');
+      const copyBtn = document.getElementById('copyBtn');
+      const copyPlainBtn = document.getElementById('copyPlainBtn');
+      const questionStyle = document.getElementById('questionStyle');
+      const answerStyle = document.getElementById('answerStyle');
+      const questionColor = document.getElementById('questionColor');
+      const answerColor = document.getElementById('answerColor');
+
+      const debounce = (fn, delay=120) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
+
+      let qaPairs = [];
+
+      // Color mapping
+      const colorMap = {
+        cyan: '#00ffff',
+        blue: '#0091ff',
+        green: '#04ff00',
+        yellow: '#ffff00',
+        red: '#ff0000',
+        white: '#ffffff'
+      };
+
+      function parseQAPairs(text) {
+        const lines = text.split('\n');
+        const pairs = [];
+        let currentQ = null;
+        let currentA = null;
+
+        for (let line of lines) {
+          const trimmed = line.trim();
+          
+          // Check for question pattern
+          const qMatch = trimmed.match(/^Q:\s*(.+)/i);
+          if (qMatch) {
+            // Save previous pair if exists
+            if (currentQ && currentA !== null) {
+              pairs.push({ question: currentQ, answer: currentA });
+            }
+            currentQ = qMatch[1];
+            currentA = null;
+            continue;
+          }
+
+          // Check for answer pattern
+          const aMatch = trimmed.match(/^A:\s*(.+)/i);
+          if (aMatch) {
+            currentA = aMatch[1];
+            continue;
+          }
+
+          // If we have a current answer and this line isn't empty, append to answer
+          if (currentA !== null && trimmed) {
+            currentA += ' ' + trimmed;
+          }
+        }
+
+        // Don't forget the last pair
+        if (currentQ && currentA !== null) {
+          pairs.push({ question: currentQ, answer: currentA });
+        }
+
+        return pairs;
+      }
+
+      function formatQAPair(pair, index) {
+        const qColor = colorMap[questionColor.value] || colorMap.cyan;
+        const aColor = colorMap[answerColor.value] || colorMap.green;
+        
+        const qStyle = questionStyle.value;
+        const aStyle = answerStyle.value;
+
+        let questionHTML = `<span class="question" style="color: ${qColor};">`;
+        let answerHTML = `<span class="answer" style="color: ${aColor};">`;
+
+        // Apply question styling
+        if (qStyle === 'bold') questionHTML += '<strong>';
+        if (qStyle === 'italic') questionHTML += '<em>';
+        if (qStyle === 'underline') questionHTML += '<u>';
+
+        questionHTML += pair.question;
+
+        if (qStyle === 'underline') questionHTML += '</u>';
+        if (qStyle === 'italic') questionHTML += '</em>';
+        if (qStyle === 'bold') questionHTML += '</strong>';
+
+        questionHTML += '</span>';
+
+        // Apply answer styling
+        if (aStyle === 'bold') answerHTML += '<strong>';
+        if (aStyle === 'italic') answerHTML += '<em>';
+        if (aStyle === 'underline') answerHTML += '<u>';
+
+        answerHTML += pair.answer;
+
+        if (aStyle === 'underline') answerHTML += '</u>';
+        if (aStyle === 'italic') answerHTML += '</em>';
+        if (aStyle === 'bold') answerHTML += '</strong>';
+
+        answerHTML += '</span>';
+
+        return `<div class="qa-pair">${questionHTML}\n${answerHTML}</div>`;
+      }
+
+      function updateOutput() {
+        const text = source.value || '';
+        qaPairs = parseQAPairs(text);
+        
+        if (qaPairs.length === 0) {
+          output.innerHTML = '';
+          countBadge.textContent = '0 Q&A PAIRS';
+          copyBtn.disabled = true;
+          copyPlainBtn.disabled = true;
+          return;
+        }
+
+        const formattedHTML = qaPairs.map((pair, index) => formatQAPair(pair, index)).join('\n\n');
+        output.innerHTML = formattedHTML;
+        
+        countBadge.textContent = `${qaPairs.length} ${qaPairs.length === 1 ? 'Q&A PAIR' : 'Q&A PAIRS'}`;
+        copyBtn.disabled = false;
+        copyPlainBtn.disabled = false;
+      }
+
+      function getPlainText() {
+        return qaPairs.map(pair => 
+          `${pair.question}\n${pair.answer}`
+        ).join('\n\n');
+      }
+
+      function getFormattedText() {
+        // Create a temporary div to extract formatted text
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = output.innerHTML;
+        
+        // Convert to plain text but preserve some formatting
+        let formatted = '';
+        const pairs = tempDiv.querySelectorAll('.qa-pair');
+        
+        pairs.forEach(pair => {
+          const question = pair.querySelector('.question').textContent;
+          const answer = pair.querySelector('.answer').textContent;
+          formatted += `${question}\n${answer}\n\n`;
+        });
+        
+        return formatted.trim();
+      }
+
+      async function copyToClipboard(text) {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'absolute';
+            ta.style.left = '-9999px';
+            ta.style.fontSize = '12pt';
+            document.body.appendChild(ta);
+            const selection = document.getSelection();
+            const originalRange = selection.rangeCount ? selection.getRangeAt(0) : null;
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (originalRange) {
+              selection.removeAllRanges();
+              selection.addRange(originalRange);
+            }
+          }
+          return true;
+        } catch (err) {
+          console.error('Copy failed:', err);
+          return false;
+        }
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 1300);
+      }
+
+      // Event listeners
+      copyBtn.addEventListener('click', async () => {
+        const text = getFormattedText();
+        const success = await copyToClipboard(text);
+        if (success) {
+          showToast(`COPIED ${qaPairs.length} Q&A PAIRS (FORMATTED)`);
+        } else {
+          showToast('COPY FAILED');
+        }
+      });
+
+      copyPlainBtn.addEventListener('click', async () => {
+        const text = getPlainText();
+        const success = await copyToClipboard(text);
+        if (success) {
+          showToast(`COPIED ${qaPairs.length} Q&A PAIRS (PLAIN)`);
+        } else {
+          showToast('COPY FAILED');
+        }
+      });
+
+      // Update output when formatting options change
+      [questionStyle, answerStyle, questionColor, answerColor].forEach(select => {
+        select.addEventListener('change', updateOutput);
+      });
+
+      const liveRender = debounce(updateOutput, 90);
+      source.addEventListener('input', liveRender);
+
+      // Initial render
+      updateOutput();
+    })();
+  </script>
+</body>
+</html>

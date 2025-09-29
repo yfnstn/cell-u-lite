@@ -57,6 +57,29 @@
       color: var(--muted);
       margin-top: 0.5rem;
     }
+    .nav-links{
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .nav-links a{
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .nav-links a:hover{
+      background: var(--accent-weak);
+      color: var(--accent-strong);
+    }
+    .nav-links a.active{
+      background: var(--surface);
+      color: var(--accent-strong);
+    }
 
     /* Two-column layout */
     .layout{
@@ -301,6 +324,10 @@
     <header class="app-title">
       <h1>Cell-u-lite v5</h1>
       <div class="hint">PASTE TEXT ON LEFT — SELECT CELLS ON RIGHT — COPY SELECTED — PASTE INTO SPREADSHEET</div>
+      <div class="nav-links">
+        <a href="cell-u-lite.html" class="active">Cell Formatter</a>
+        <a href="qa-formatter.html">Q&A Formatter</a>
+      </div>
     </header>
 
     <main class="layout" aria-label="Terminal cell formatter">
